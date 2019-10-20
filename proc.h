@@ -1,6 +1,11 @@
 #ifndef __PROC_H
 # define __PROC_H
 
+#ifndef __PROC_TIME
+#define __PROC_TIME
+#include "date.h"
+#endif
+
 #ifndef NULL
 # define NULL 0
 #endif // NULL
@@ -65,6 +70,12 @@ struct proc {
   struct file *ofile[NOFILE];  // Open files
   struct inode *cwd;           // Current directory
   char name[16];               // Process name (debugging)
+
+  // __PROC_TIME
+  struct rtcdate begin_date;
+  uint ticks_total;
+  uint ticks_begin;
+  uint sched_times;
 };
 
 // Process memory is laid out contiguously, low addresses first:
@@ -74,3 +85,6 @@ struct proc {
 //   expandable heap
 
 #endif // __PROC_H
+
+
+

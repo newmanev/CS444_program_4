@@ -93,6 +93,12 @@ found:
 
   release(&ptable.lock);
 
+  // __PROC_TIME
+  cmostime(&p->begin_date);
+  p->ticks_total = 0;
+  p->ticks_begin = 0;
+  p->sched_times = 0;
+
   // Allocate kernel stack.
   if((p->kstack = kalloc()) == 0){
     p->state = UNUSED;
@@ -316,6 +322,18 @@ wait(void)
   }
 }
 
+// __PROC_TIME
+int 
+evan_uptime(void) 
+{
+  uint xticks;
+
+  acquire(&tickslock);
+  xticks = ticks;
+  release(&tickslock);
+  return xticks;
+}
+
 //PAGEBREAK: 42
 // Per-CPU process scheduler.
 // Each CPU calls scheduler() after setting itself up.
@@ -346,10 +364,22 @@ scheduler(void)
       // before jumping back to us.
       c->proc = p;
       switchuvm(p);
+
+	  #ifndef __PROC_TIME
+	  p->sched_times++;
+	  p->ticks_begin = evan_uptime();
+
+	  #endif
+
       p->state = RUNNING;
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
+
+	  #ifndef __PROC_TIME
+	  p->ticks_total = evan_uptime() - p->ticks_begin;
+
+	  #endif
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.

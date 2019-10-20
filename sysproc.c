@@ -114,6 +114,11 @@ sys_uptime(void)
   xticks = ticks;
   release(&tickslock);
   return xticks;
+  // __PROC_TIME
+  // uint xticks;
+
+  // xticks = evan_uptime();
+  // return xticks;
 }
 
 int

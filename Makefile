@@ -191,6 +191,8 @@ UPROGS=\
 	_mv\
 	_cp\
 	_shutdown\
+	_mult\
+	_mfork\
 	$(NULL)
 
 fs.img: mkfs README $(UPROGS)

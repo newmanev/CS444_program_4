@@ -365,21 +365,18 @@ scheduler(void)
       c->proc = p;
       switchuvm(p);
 
-	  #ifndef __PROC_TIME
+	  // __PROC_TIME
 	  p->sched_times++;
 	  p->ticks_begin = evan_uptime();
 
-	  #endif
 
       p->state = RUNNING;
 
       swtch(&(c->scheduler), p->context);
       switchkvm();
 
-	  #ifndef __PROC_TIME
-	  p->ticks_total = evan_uptime() - p->ticks_begin;
-
-	  #endif
+	  // __PROC_TIME
+	  p->ticks_total = (evan_uptime() - p->ticks_begin);
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
@@ -549,7 +546,7 @@ sys_cps(void)
 
     acquire(&ptable.lock);
     cprintf(
-        "pid\tppid\tname\tstate\tsize"
+        "pid\tppid\tname\tstate\tsize\tstart time\t\tticks\tsched"
         );
     cprintf("\n");
     for (i = 0; i < NPROC; i++) {
@@ -561,12 +558,74 @@ sys_cps(void)
             else {
                 state = "uknown";
             }
-            cprintf("%d\t%d\t%s\t%s\t%u"
+            cprintf("%d\t%d\t%s\t%s\t%u\t%d-"
                     , ptable.proc[i].pid
                     , ptable.proc[i].parent ? ptable.proc[i].parent->pid : 1
                     , ptable.proc[i].name, state
                     , ptable.proc[i].sz
-                );
+					, ptable.proc[i].begin_date.year
+			);
+
+			// MONTH
+			// if (ptable.proc[i].begin_date.month < 10) {
+			//	cprintf("0%d-"
+			//		, ptable.proc[i].begin_date.month
+			//	);
+			// } else {
+			//	cprintf("%d-"
+			//		, ptable.proc[i].begin_date.month
+			//	);
+			// }
+
+			// DAY
+			if (ptable.proc[i].begin_date.day < 10) {
+				cprintf("0%d "
+					, ptable.proc[i].begin_date.day
+				);
+			} else {
+				cprintf("%d "
+					, ptable.proc[i].begin_date.day
+				);
+			}
+
+			// HOUR
+			if (ptable.proc[i].begin_date.hour < 10) {
+				cprintf("0%d:"
+					, ptable.proc[i].begin_date.hour
+				);
+			} else {
+				cprintf("%d:"
+					, ptable.proc[i].begin_date.hour
+				);
+			}
+
+			// MINUTE
+			if (ptable.proc[i].begin_date.minute < 10) {
+				cprintf("0%d:"
+					, ptable.proc[i].begin_date.minute
+				);
+			} else {
+				cprintf("%d:"
+					, ptable.proc[i].begin_date.minute
+				);
+			}
+
+			// SECOND
+			if (ptable.proc[i].begin_date.second < 10) {
+				cprintf("0%d\t"
+					, ptable.proc[i].begin_date.second
+				);
+			} else {
+				cprintf("%d\t"
+					, ptable.proc[i].begin_date.second
+				);
+			}
+
+			cprintf("%d\t%d"
+					, ptable.proc[i].ticks_total
+					, ptable.proc[i].sched_times
+			);
+
             cprintf("\n");
         }
         else {

@@ -376,7 +376,7 @@ scheduler(void)
       switchkvm();
 
 	  // __PROC_TIME
-	  p->ticks_total = (evan_uptime() - p->ticks_begin);
+	  p->ticks_total += (evan_uptime() - p->ticks_begin);
 
       // Process is done running for now.
       // It should have changed its p->state before coming back.
@@ -567,15 +567,15 @@ sys_cps(void)
 			);
 
 			// MONTH
-			// if (ptable.proc[i].begin_date.month < 10) {
-			//	cprintf("0%d-"
-			//		, ptable.proc[i].begin_date.month
-			//	);
-			// } else {
-			//	cprintf("%d-"
-			//		, ptable.proc[i].begin_date.month
-			//	);
-			// }
+			if (ptable.proc[i].begin_date.month < 10) {
+				cprintf("0%d-"
+				, ptable.proc[i].begin_date.month
+				);
+			} else {
+				cprintf("%d-"
+				, ptable.proc[i].begin_date.month
+				);
+			}
 
 			// DAY
 			if (ptable.proc[i].begin_date.day < 10) {

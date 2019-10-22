@@ -29,3 +29,4 @@
 #define SYS_kdebug 24
 
 #define SYS_halt 25
+#define SYS_rrand 26

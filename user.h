@@ -147,6 +147,7 @@ int cps(int);
 #endif // CPS
 int kdebug(int);
 int halt(void);
+int rrand(void);
 
 // ulib.c
 int stat(const char*, struct stat*);

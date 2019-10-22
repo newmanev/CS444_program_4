@@ -38,3 +38,4 @@ SYSCALL(cps)
 
 SYSCALL(kdebug)
 SYSCALL(halt)
+SYSCALL(rrand)

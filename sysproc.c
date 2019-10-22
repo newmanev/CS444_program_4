@@ -6,6 +6,7 @@
 #include "memlayout.h"
 #include "mmu.h"
 #include "proc.h"
+#include "rand.h"
 
 int
 sys_fork(void)
@@ -126,4 +127,10 @@ sys_halt(void)
 {
 	outb(0xf4, 0x00);
 	return 0;
+}
+
+int
+sys_rrand(void)
+{
+	return rand();
 }

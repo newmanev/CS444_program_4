@@ -6,6 +6,7 @@
 #include "x86.h"
 #include "proc.h"
 #include "spinlock.h"
+#include "rand.h"
 
 uint debugState = FALSE;
 
@@ -98,6 +99,7 @@ found:
   p->ticks_total = 0;
   p->ticks_begin = 0;
   p->sched_times = 0;
+  p->nice_value = DEFAULT_NICE_VALUE;
 
   // Allocate kernel stack.
   if((p->kstack = kalloc()) == 0){
@@ -218,6 +220,9 @@ fork(void)
     if(curproc->ofile[i])
       np->ofile[i] = filedup(curproc->ofile[i]);
   np->cwd = idup(curproc->cwd);
+
+  // __LOTTERY_SCHED
+  np->nice_value = curproc->nice_value;
 
   safestrcpy(np->name, curproc->name, sizeof(curproc->name));
 
@@ -348,6 +353,10 @@ scheduler(void)
   struct proc *p;
   struct cpu *c = mycpu();
   c->proc = 0;
+  int total_nice_values = 0;
+  int ticket = 0;
+  int proc_nice_value = 0;
+  int rand_num = 0;
   
   for(;;){
     // Enable interrupts on this processor.
@@ -355,32 +364,49 @@ scheduler(void)
 
     // Loop over process table looking for process to run.
     acquire(&ptable.lock);
+
+    total_nice_values = 0;
     for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
-      if(p->state != RUNNABLE)
-        continue;
+      if (p->state == RUNNABLE) {
+        total_nice_values += p->nice_value;
+      }
+    }
 
-      // Switch to chosen process.  It is the process's job
-      // to release ptable.lock and then reacquire it
-      // before jumping back to us.
-      c->proc = p;
-      switchuvm(p);
+    if (total_nice_values != 0) {
 
-	  // __PROC_TIME
-	  p->sched_times++;
-	  p->ticks_begin = evan_uptime();
+      rand_num = rand();
+      ticket = rand_num % total_nice_values + MIN_NICE_VALUE;
+      proc_nice_value = 0;
+
+      for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+        if(p->state == RUNNABLE) {
+          proc_nice_value += p->nice_value;
+          if(proc_nice_value >= ticket) {
+            // Switch to chosen process.  It is the process's job
+            // to release ptable.lock and then reacquire it
+            // before jumping back to us.
+            c->proc = p;
+            switchuvm(p);
+
+            // __PROC_TIME
+            p->sched_times++;
+            p->ticks_begin = evan_uptime();
 
 
-      p->state = RUNNING;
+            p->state = RUNNING;
 
-      swtch(&(c->scheduler), p->context);
-      switchkvm();
+            swtch(&(c->scheduler), p->context);
+            switchkvm();
 
-	  // __PROC_TIME
-	  p->ticks_total += (evan_uptime() - p->ticks_begin);
+            // __PROC_TIME
+            p->ticks_total += (evan_uptime() - p->ticks_begin);
 
-      // Process is done running for now.
-      // It should have changed its p->state before coming back.
-      c->proc = 0;
+            // Process is done running for now.
+            // It should have changed its p->state before coming back.
+            c->proc = 0;	
+          }
+        }
+      }
     }
     release(&ptable.lock);
 

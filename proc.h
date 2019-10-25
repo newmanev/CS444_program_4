@@ -18,6 +18,9 @@
 # define TRUE 1
 #endif
 
+#define DEFAULT_NICE_VALUE 20
+#define MAX_NICE_VALUE 40
+#define MIN_NICE_VALUE 1
 
 // Per-CPU state
 struct cpu {
@@ -76,6 +79,8 @@ struct proc {
   uint ticks_total;
   uint ticks_begin;
   uint sched_times;
+
+  int nice_value;
 };
 
 // Process memory is laid out contiguously, low addresses first:

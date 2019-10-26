@@ -30,3 +30,4 @@
 
 #define SYS_halt 25
 #define SYS_rrand 26
+#define SYS_renice 27

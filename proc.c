@@ -692,3 +692,24 @@ procdump(void)
     cprintf("\n");
   }
 }
+
+int
+sys_renice(int pid, int new_nice_value) {
+  struct proc *p;
+
+  if(new_nice_value > MAX_NICE_VALUE || new_nice_value < MIN_NICE_VALUE) {
+      return 1;
+  }
+
+  acquire(&ptable.lock);
+  for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
+      if(p->pid == pid){
+          p->nice_value = new_nice_value;
+          release(&ptable.lock);
+          return 0;
+      }
+  }
+  release(&ptable.lock);
+
+  return 2;
+}

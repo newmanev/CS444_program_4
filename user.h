@@ -148,6 +148,7 @@ int cps(int);
 int kdebug(int);
 int halt(void);
 int rrand(void);
+int renice(int, int);
 
 // ulib.c
 int stat(const char*, struct stat*);

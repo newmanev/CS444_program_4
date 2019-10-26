@@ -112,6 +112,7 @@ extern int sys_cps(void);
 extern int sys_kdebug(void);
 extern int sys_halt(void);
 extern int sys_rrand(void);
+extern int sys_renice(void);
 
 static int (*syscalls[])(void) = {
 [SYS_fork]    sys_fork,
@@ -144,6 +145,7 @@ static int (*syscalls[])(void) = {
 [SYS_kdebug] sys_kdebug,
 [SYS_halt] sys_halt,
 [SYS_rrand] sys_rrand,
+[SYS_renice] sys_renice,
 };
 
 void

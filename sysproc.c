@@ -134,3 +134,17 @@ sys_rrand(void)
 {
 	return rand();
 }
+
+int
+sys_renice(void)
+{
+  int pid, nnice;
+
+  if(argint(0, &pid) < 0)
+    return -1;
+
+  if(argint(1, &nnice) < 0)
+    return -1;
+
+  return renice(pid, nnice);
+}

@@ -572,7 +572,7 @@ sys_cps(void)
 
     acquire(&ptable.lock);
     cprintf(
-        "pid\tppid\tname\tstate\tsize\tstart time\t\tticks\tsched"
+        "pid\tppid\tname\tstate\tsize\tstart time\t\tticks\tsched\tnice"
         );
     cprintf("\n");
     for (i = 0; i < NPROC; i++) {
@@ -652,6 +652,10 @@ sys_cps(void)
 					, ptable.proc[i].sched_times
 			);
 
+      cprintf("\t%d"
+          , ptable.proc[i].nice_value
+      );
+
             cprintf("\n");
         }
         else {
@@ -694,22 +698,19 @@ procdump(void)
 }
 
 int
-sys_renice(int pid, int new_nice_value) {
+renice(int pid, int new_nice_value) {
   struct proc *p;
 
   if(new_nice_value > MAX_NICE_VALUE || new_nice_value < MIN_NICE_VALUE) {
       return 1;
   }
 
-  acquire(&ptable.lock);
   for(p = ptable.proc; p < &ptable.proc[NPROC]; p++){
       if(p->pid == pid){
           p->nice_value = new_nice_value;
-          release(&ptable.lock);
           return 0;
       }
   }
-  release(&ptable.lock);
 
   return 2;
 }

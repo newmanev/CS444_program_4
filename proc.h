@@ -83,6 +83,8 @@ struct proc {
   int nice_value;
 };
 
+int renice(int, int);
+
 // Process memory is laid out contiguously, low addresses first:
 //   text
 //   original data and bss
